@@ -1,0 +1,247 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: observability-dashboard
+  namespace: monitoring
+data:
+  observability-dashboard.json: |
+    {
+      "dashboard": {
+        "id": null,
+        "title": "Microservices Observability - Complete",
+        "tags": ["microservices", "observability", "logs", "traces"],
+        "style": "dark",
+        "timezone": "browser",
+        "panels": [
+          {
+            "id": 1,
+            "title": "Service Health Overview",
+            "type": "stat",
+            "targets": [
+              {
+                "expr": "up{kubernetes_namespace=\"ecomm-prod\"}",
+                "legendFormat": "{{job}}"
+              }
+            ],
+            "fieldConfig": {
+              "defaults": {
+                "color": {
+                  "mode": "thresholds"
+                },
+                "thresholds": {
+                  "steps": [
+                    {"color": "red", "value": 0},
+                    {"color": "green", "value": 1}
+                  ]
+                }
+              }
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+          },
+          {
+            "id": 2,
+            "title": "Request Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{kubernetes_namespace=\"ecomm-prod\"}[5m])) by (job)",
+                "legendFormat": "{{job}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Requests/sec", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+          },
+          {
+            "id": 3,
+            "title": "Response Time (95th percentile)",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{kubernetes_namespace=\"ecomm-prod\"}[5m])) by (le, job))",
+                "legendFormat": "{{job}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Seconds", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+          },
+          {
+            "id": 4,
+            "title": "Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{status=~\"5..\", kubernetes_namespace=\"ecomm-prod\"}[5m])) by (job) / sum(rate(http_requests_total{kubernetes_namespace=\"ecomm-prod\"}[5m])) by (job) * 100",
+                "legendFormat": "{{job}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Error %", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+          },
+          {
+            "id": 5,
+            "title": "Log Volume by Service",
+            "type": "logs",
+            "targets": [
+              {
+                "expr": "{kubernetes_namespace=\"ecomm-prod\"}",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "showTime": true,
+              "showLabels": true,
+              "showCommonLabels": false,
+              "wrapLogMessage": true,
+              "prettifyLogMessage": false,
+              "enableLogDetails": true
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16}
+          },
+          {
+            "id": 6,
+            "title": "Error Logs",
+            "type": "logs",
+            "targets": [
+              {
+                "expr": "{kubernetes_namespace=\"ecomm-prod\"} |= \"error\"",
+                "refId": "A"
+              }
+            ],
+            "options": {
+              "showTime": true,
+              "showLabels": true,
+              "showCommonLabels": false,
+              "wrapLogMessage": true,
+              "prettifyLogMessage": false,
+              "enableLogDetails": true
+            },
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16}
+          },
+          {
+            "id": 7,
+            "title": "Trace Latency Distribution",
+            "type": "heatmap",
+            "targets": [
+              {
+                "expr": "sum(rate(tempo_request_duration_seconds_bucket[5m])) by (le, service_name)",
+                "format": "heatmap",
+                "refId": "A"
+              }
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24}
+          },
+          {
+            "id": 8,
+            "title": "Trace Error Rate",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(tempo_request_errors_total[5m])) by (service_name) / sum(rate(tempo_request_total[5m])) by (service_name) * 100",
+                "legendFormat": "{{service_name}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Error %", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24}
+          },
+          {
+            "id": 9,
+            "title": "CPU Usage by Pod",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(rate(container_cpu_usage_seconds_total{kubernetes_namespace=\"ecomm-prod\"}[5m])) by (pod) * 100",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "CPU %", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 32}
+          },
+          {
+            "id": 10,
+            "title": "Memory Usage by Pod",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "sum(container_memory_usage_bytes{kubernetes_namespace=\"ecomm-prod\"}) by (pod) / 1024 / 1024",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Memory MB", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 32}
+          },
+          {
+            "id": 11,
+            "title": "Redis Metrics",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "redis_connected_clients",
+                "legendFormat": "Connected Clients"
+              },
+              {
+                "expr": "redis_memory_used_bytes / 1024 / 1024",
+                "legendFormat": "Memory Used (MB)"
+              }
+            ],
+            "yAxes": [
+              {"label": "Value", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 0, "y": 40}
+          },
+          {
+            "id": 12,
+            "title": "Pod Restarts",
+            "type": "graph",
+            "targets": [
+              {
+                "expr": "increase(kube_pod_container_status_restarts_total{kubernetes_namespace=\"ecomm-prod\"}[1h])",
+                "legendFormat": "{{pod}}"
+              }
+            ],
+            "yAxes": [
+              {"label": "Restarts", "min": 0}
+            ],
+            "gridPos": {"h": 8, "w": 12, "x": 12, "y": 40}
+          }
+        ],
+        "time": {
+          "from": "now-1h",
+          "to": "now"
+        },
+        "refresh": "30s",
+        "templating": {
+          "list": [
+            {
+              "name": "namespace",
+              "type": "query",
+              "query": "ecomm-prod",
+              "current": {
+                "value": "ecomm-prod",
+                "text": "ecomm-prod"
+              }
+            },
+            {
+              "name": "service",
+              "type": "query",
+              "query": "frontend,cartservice,productcatalogservice,checkoutservice,paymentservice,shippingservice,currencyservice,emailservice,recommendationservice,adservice",
+              "current": {
+                "value": "frontend",
+                "text": "frontend"
+              }
+            }
+          ]
+        }
+      }
+    } 

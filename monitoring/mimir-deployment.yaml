@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir
+  namespace: monitoring
+  labels:
+    app: mimir
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimir
+  template:
+    metadata:
+      labels:
+        app: mimir
+    spec:
+      containers:
+      - name: mimir
+        image: grafana/mimir:2.10.1
+        args:
+          - "-config.file=/etc/mimir/mimir.yaml"
+        ports:
+        - containerPort: 9009
+          name: http
+        - containerPort: 9095
+          name: grpc
+        - containerPort: 7946
+          name: memberlist
+        volumeMounts:
+        - name: mimir-config
+          mountPath: /etc/mimir
+        - name: mimir-storage
+          mountPath: /data
+        resources:
+          requests:
+            cpu: 1000m
+            memory: 2Gi
+          limits:
+            cpu: 2000m
+            memory: 4Gi
+        livenessProbe:
+          httpGet:
+            path: /ready
+            port: 9009
+          initialDelaySeconds: 60
+          timeoutSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 9009
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+      volumes:
+      - name: mimir-config
+        configMap:
+          name: mimir-config
+      - name: mimir-storage
+        persistentVolumeClaim:
+          claimName: mimir-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir
+  namespace: monitoring
+  labels:
+    app: mimir
+spec:
+  selector:
+    app: mimir
+  ports:
+  - port: 9009
+    targetPort: 9009
+    protocol: TCP
+    name: http
+  - port: 9095
+    targetPort: 9095
+    protocol: TCP
+    name: grpc
+  - port: 7946
+    targetPort: 7946
+    protocol: TCP
+    name: memberlist
+  type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mimir-pvc
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: gp2 

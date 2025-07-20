@@ -42,7 +42,28 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
 
-## Quickstart (GKE)
+## Quickstart
+
+### AWS EKS Deployment (Recommended)
+
+For a complete deployment with monitoring and observability:
+
+```bash
+# Clone the repository
+git clone --depth 1 --branch v0 https://github.com/GoogleCloudPlatform/microservices-demo.git
+cd microservices-demo/
+
+# Deploy to AWS EKS with monitoring
+./installation/deploy-to-aws-eks.sh
+```
+
+This will:
+- Create or configure an EKS cluster
+- Deploy the microservices application
+- Optionally deploy a complete monitoring stack (Prometheus, Loki, Tempo, Grafana)
+- Provide access URLs and useful commands
+
+### Google Cloud (GKE) Deployment
 
 1. Ensure you have the following requirements:
    - [Google Cloud project](https://cloud.google.com/resource-manager/docs/creating-managing-projects#creating_a_project).
@@ -125,6 +146,42 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
    ```
 
    Deleting the cluster may take a few minutes.
+
+## Project Organization
+
+This repository is organized into focused directories for better maintainability:
+
+### `/installation` - Deployment and Setup
+- **Purpose**: All installation and deployment artifacts
+- **Contents**:
+  - AWS EKS deployment scripts
+  - Cluster management tools
+  - Configuration files
+  - Documentation and troubleshooting guides
+  - Credentials and keys (secure appropriately)
+
+### `/monitoring` - Observability Stack
+- **Purpose**: Complete monitoring and observability solution
+- **Components**:
+  - Prometheus (metrics collection)
+  - Mimir (scalable metrics storage)
+  - Loki (log aggregation)
+  - Tempo (distributed tracing)
+  - OpenTelemetry Collector
+  - Grafana (visualization)
+  - kube-state-metrics and node-exporter
+
+### `/release` - Application Manifests
+- **Purpose**: Kubernetes manifests for the microservices application
+- **Contents**:
+  - Service deployments
+  - ConfigMaps and Secrets
+  - Ingress configurations
+  - Persistent volume claims
+
+### `/src` - Application Source Code
+- **Purpose**: Source code for all microservices
+- **Languages**: Go, Python, Node.js, Java, C#
 
 ## Additional deployment options
 

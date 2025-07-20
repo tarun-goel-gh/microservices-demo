@@ -1,0 +1,109 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  microservices-rules.yml: |
+    groups:
+      - name: microservices-demo
+        rules:
+          # High CPU usage
+          - alert: HighCPUUsage
+            expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High CPU usage on {{ $labels.instance }}"
+              description: "CPU usage is above 80% for more than 5 minutes"
+
+          # High memory usage
+          - alert: HighMemoryUsage
+            expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High memory usage on {{ $labels.instance }}"
+              description: "Memory usage is above 85% for more than 5 minutes"
+
+          # Pod restarting frequently
+          - alert: PodRestartingFrequently
+            expr: increase(kube_pod_container_status_restarts_total[15m]) > 5
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Pod {{ $labels.pod }} is restarting frequently"
+              description: "Pod {{ $labels.pod }} has restarted more than 5 times in the last 15 minutes"
+
+          # Service down
+          - alert: ServiceDown
+            expr: up == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Service {{ $labels.job }} is down"
+              description: "Service {{ $labels.job }} has been down for more than 1 minute"
+
+          # High response time
+          - alert: HighResponseTime
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, job)) > 2
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "High response time for {{ $labels.job }}"
+              description: "95th percentile response time is above 2 seconds for {{ $labels.job }}"
+
+          # High error rate
+          - alert: HighErrorRate
+            expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (job) / sum(rate(http_requests_total[5m])) by (job) > 0.05
+            for: 5m
+            labels:
+              severity: critical
+            annotations:
+              summary: "High error rate for {{ $labels.job }}"
+              description: "Error rate is above 5% for {{ $labels.job }}"
+
+          # Frontend specific alerts
+          - alert: FrontendHighLatency
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="frontend"}[5m])) by (le)) > 1
+            for: 3m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Frontend high latency"
+              description: "Frontend 95th percentile response time is above 1 second"
+
+          # Cart service specific alerts
+          - alert: CartServiceHighLatency
+            expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="cartservice"}[5m])) by (le)) > 0.5
+            for: 3m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Cart service high latency"
+              description: "Cart service 95th percentile response time is above 0.5 seconds"
+
+          # Redis connection issues
+          - alert: RedisConnectionIssues
+            expr: redis_up == 0
+            for: 1m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Redis connection issues"
+              description: "Redis is not responding"
+
+          # Load generator issues
+          - alert: LoadGeneratorIssues
+            expr: up{job="loadgenerator"} == 0
+            for: 2m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Load generator is down"
+              description: "Load generator service is not running" 

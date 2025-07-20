@@ -1,0 +1,149 @@
+{
+  "test_scenarios": {
+    "smoke_test": {
+      "description": "Quick smoke test to verify basic functionality",
+      "duration": "2m",
+      "stages": [
+        { "duration": "30s", "target": 2 },
+        { "duration": "1m", "target": 2 },
+        { "duration": "30s", "target": 0 }
+      ],
+      "thresholds": {
+        "http_req_duration": ["p(95)<1000"],
+        "http_req_failed": ["rate<0.05"]
+      }
+    },
+    "load_test": {
+      "description": "Standard load test with moderate traffic",
+      "duration": "10m",
+      "stages": [
+        { "duration": "2m", "target": 10 },
+        { "duration": "5m", "target": 10 },
+        { "duration": "2m", "target": 20 },
+        { "duration": "1m", "target": 0 }
+      ],
+      "thresholds": {
+        "http_req_duration": ["p(95)<500"],
+        "http_req_failed": ["rate<0.1"]
+      }
+    },
+    "stress_test": {
+      "description": "Stress test to find breaking point",
+      "duration": "15m",
+      "stages": [
+        { "duration": "2m", "target": 10 },
+        { "duration": "3m", "target": 20 },
+        { "duration": "3m", "target": 30 },
+        { "duration": "3m", "target": 40 },
+        { "duration": "3m", "target": 50 },
+        { "duration": "1m", "target": 0 }
+      ],
+      "thresholds": {
+        "http_req_duration": ["p(95)<1000"],
+        "http_req_failed": ["rate<0.2"]
+      }
+    },
+    "spike_test": {
+      "description": "Spike test to test system behavior under sudden load",
+      "duration": "5m",
+      "stages": [
+        { "duration": "1m", "target": 10 },
+        { "duration": "30s", "target": 50 },
+        { "duration": "1m", "target": 50 },
+        { "duration": "30s", "target": 10 },
+        { "duration": "2m", "target": 10 }
+      ],
+      "thresholds": {
+        "http_req_duration": ["p(95)<800"],
+        "http_req_failed": ["rate<0.15"]
+      }
+    },
+    "endurance_test": {
+      "description": "Long-running test to check for memory leaks and stability",
+      "duration": "30m",
+      "stages": [
+        { "duration": "2m", "target": 5 },
+        { "duration": "25m", "target": 5 },
+        { "duration": "3m", "target": 0 }
+      ],
+      "thresholds": {
+        "http_req_duration": ["p(95)<600"],
+        "http_req_failed": ["rate<0.1"]
+      }
+    }
+  },
+  "environments": {
+    "local": {
+      "base_url": "http://localhost:8080",
+      "description": "Local development environment"
+    },
+    "staging": {
+      "base_url": "http://staging.example.com",
+      "description": "Staging environment"
+    },
+    "production": {
+      "base_url": "http://production.example.com",
+      "description": "Production environment"
+    },
+    "aws_eks": {
+      "base_url": "http://<loadbalancer-url>",
+      "description": "AWS EKS deployment"
+    }
+  },
+  "test_data": {
+    "product_ids": [
+      "OLJCESPC7Z",
+      "66VCHSJNUP",
+      "1YMWWN1N4O",
+      "2ZYFJ3GM2N",
+      "0PUK6V6EV0",
+      "LS4PSXUNUM",
+      "9SIQT8TOJO",
+      "6E92ZMYYFZ",
+      "L9ECAV7KIM",
+      "2LS3EF2PRP"
+    ],
+    "user_ids": [
+      "user-001",
+      "user-002",
+      "user-003",
+      "user-004",
+      "user-005",
+      "user-006",
+      "user-007",
+      "user-008",
+      "user-009",
+      "user-010"
+    ],
+    "search_terms": [
+      "phone",
+      "laptop",
+      "camera",
+      "watch",
+      "speaker",
+      "headphone",
+      "tablet",
+      "keyboard",
+      "mouse",
+      "monitor"
+    ]
+  },
+  "output_formats": {
+    "json": {
+      "extension": "json",
+      "description": "JSON format for programmatic analysis"
+    },
+    "influxdb": {
+      "extension": "influxdb",
+      "description": "InfluxDB format for time series analysis"
+    },
+    "cloudwatch": {
+      "extension": "cloudwatch",
+      "description": "AWS CloudWatch format"
+    },
+    "datadog": {
+      "extension": "datadog",
+      "description": "Datadog format for monitoring"
+    }
+  }
+} 

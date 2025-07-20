@@ -1,0 +1,197 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enhanced-prometheus-rules
+  namespace: monitoring
+data:
+  rules.yaml: |
+    groups:
+    - name: infrastructure
+      rules:
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.instance }}"
+          description: "CPU usage is above 80% for 5 minutes on {{ $labels.instance }}"
+      
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High memory usage on {{ $labels.instance }}"
+          description: "Memory usage is above 85% for 5 minutes on {{ $labels.instance }}"
+      
+      - alert: DiskSpaceFilling
+        expr: (node_filesystem_avail_bytes{mountpoint="/"} * 100) / node_filesystem_size_bytes{mountpoint="/"} < 20
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk space filling up on {{ $labels.instance }}"
+          description: "Disk space is below 20% on {{ $labels.instance }}"
+      
+      - alert: NodeDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Node {{ $labels.instance }} is down"
+          description: "Node {{ $labels.instance }} has been down for more than 1 minute"
+    
+    - name: kubernetes
+      rules:
+      - alert: PodCrashLooping
+        expr: rate(kube_pod_container_status_restarts_total[15m]) * 60 > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} is crash looping"
+          description: "Pod {{ $labels.pod }} is restarting {{ printf \"%.2f\" $value }} times / 5 minutes"
+      
+      - alert: PodNotReady
+        expr: kube_pod_status_phase{phase=~"Pending|Unknown"} > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Pod {{ $labels.pod }} is not ready"
+          description: "Pod {{ $labels.pod }} has been in {{ $labels.phase }} state for more than 5 minutes"
+      
+      - alert: DeploymentNotAvailable
+        expr: kube_deployment_status_replicas_available / kube_deployment_spec_replicas < 0.5
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Deployment {{ $labels.deployment }} is not available"
+          description: "Deployment {{ $labels.deployment }} has less than 50% of replicas available"
+    
+    - name: application
+      rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate for {{ $labels.service }}"
+          description: "Error rate is above 5% for {{ $labels.service }}"
+      
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High response time for {{ $labels.service }}"
+          description: "95th percentile response time is above 1 second for {{ $labels.service }}"
+      
+      - alert: ServiceDown
+        expr: up{job=~"frontend|catalog|cart|checkout|payment|shipping"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service {{ $labels.service }} is down"
+          description: "Service {{ $labels.service }} has been down for more than 1 minute"
+      
+      - alert: DatabaseConnectionIssues
+        expr: rate(database_connections_failed_total[5m]) > 0
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Database connection issues for {{ $labels.service }}"
+          description: "Database connections are failing for {{ $labels.service }}"
+    
+    - name: business
+      rules:
+      - alert: LowOrderVolume
+        expr: rate(orders_total[1h]) < 10
+        for: 30m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Low order volume detected"
+          description: "Order volume is below 10 orders per hour for 30 minutes"
+      
+      - alert: HighCartAbandonment
+        expr: (rate(cart_abandoned_total[1h]) / rate(cart_created_total[1h])) > 0.8
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High cart abandonment rate"
+          description: "Cart abandonment rate is above 80% for 15 minutes"
+      
+      - alert: PaymentFailureRate
+        expr: rate(payment_failed_total[5m]) / rate(payment_attempted_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High payment failure rate"
+          description: "Payment failure rate is above 10% for 5 minutes"
+    
+    - name: observability
+      rules:
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Prometheus is down"
+          description: "Prometheus has been down for more than 1 minute"
+      
+      - alert: GrafanaDown
+        expr: up{job="grafana"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Grafana is down"
+          description: "Grafana has been down for more than 1 minute"
+      
+      - alert: LokiDown
+        expr: up{job="loki"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Loki is down"
+          description: "Loki has been down for more than 1 minute"
+      
+      - alert: TempoDown
+        expr: up{job="tempo"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Tempo is down"
+          description: "Tempo has been down for more than 1 minute"
+      
+      - alert: HighLogVolume
+        expr: rate(log_entries_total[5m]) > 10000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High log volume detected"
+          description: "Log volume is above 10,000 entries per second for 5 minutes"
+      
+      - alert: HighMetricCardinality
+        expr: count by(__name__) (count by(__name__, instance) (up)) > 1000
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High metric cardinality detected"
+          description: "Metric {{ $labels.__name__ }} has more than 1000 series" 
