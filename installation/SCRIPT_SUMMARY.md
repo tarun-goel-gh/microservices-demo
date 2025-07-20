@@ -2,7 +2,58 @@
 
 This document provides an overview of all installation scripts and their purposes.
 
-## 🚀 **Deployment Scripts**
+## 🎯 **Master Scripts (Recommended)**
+
+### **1. Complete Stack Deployment**
+**File**: `deploy-complete-stack.sh`
+**Purpose**: One-command deployment of complete stack (observability + application)
+**Features**:
+- ✅ **Automated orchestration**: Deploys observability framework first, then application
+- ✅ **Multiple deployment types**: AWS and local deployment support
+- ✅ **Flexible configuration**: External access, Istio, load generator options
+- ✅ **Comprehensive verification**: Validates both observability and application
+- ✅ **Production ready**: Handles all prerequisites and error conditions
+
+**Usage**:
+```bash
+# AWS deployment with external access
+./installation/deploy-complete-stack.sh
+
+# Local deployment
+./installation/deploy-complete-stack.sh --type local
+
+# AWS with Istio
+./installation/deploy-complete-stack.sh --type aws --enable-istio
+
+# Custom namespace
+./installation/deploy-complete-stack.sh --namespace my-app
+```
+
+### **2. Complete Stack Cleanup**
+**File**: `cleanup-complete-stack.sh`
+**Purpose**: One-command cleanup of complete stack
+**Features**:
+- ✅ **Smart detection**: Auto-detects deployment type (AWS vs local)
+- ✅ **Flexible cleanup**: Clean up everything, app-only, or observability-only
+- ✅ **Orphaned resource cleanup**: Removes PVs, PVCs, and load balancers
+- ✅ **Safety features**: Confirmation prompts and verification
+- ✅ **Comprehensive verification**: Ensures complete cleanup
+
+**Usage**:
+```bash
+# Clean up everything (with confirmation)
+./installation/cleanup-complete-stack.sh
+
+# Clean up only application
+./installation/cleanup-complete-stack.sh --type app-only
+
+# Clean up without confirmation
+./installation/cleanup-complete-stack.sh --confirm
+```
+
+---
+
+## 🚀 **Individual Deployment Scripts**
 
 ### **1. AWS Observability Deployment (Production Ready)**
 **File**: `deploy-aws-observability.sh`
