@@ -49,6 +49,7 @@ This review was conducted to ensure the installation scripts meet the following 
 
 ### **AWS Deployment Script (`deploy-aws-observability.sh`)**
 - ✅ **Fixed EKS wait issue**: Replaced `eksctl utils wait` with robust fallback
+- ✅ **Fixed eksctl compatibility**: Handles `--force-update` flag availability
 - ✅ **Added timeout protection**: Prevents infinite waiting
 - ✅ **Enhanced error handling**: Better error messages and recovery
 - ✅ **kubectl verification**: Ensures connectivity after cluster ready

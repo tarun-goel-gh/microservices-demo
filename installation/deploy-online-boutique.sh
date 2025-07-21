@@ -30,12 +30,13 @@ print_error() {
 }
 
 # Configuration variables
-NAMESPACE="production-ecom"
+NAMESPACE="production"
 DEPLOYMENT_METHOD="kubernetes"  # Options: kubernetes, helm, kustomize
 ENABLE_ISTIO="true"
 ENABLE_LOAD_GENERATOR="false"
 ENABLE_MONITORING="true"
 EXTERNAL_ACCESS="true"
+LOAD_BALANCER_TYPE="clb"  # Options: nlb, alb, clb (Classic Load Balancer)
 
 # Function to check prerequisites
 check_prerequisites() {
@@ -220,7 +221,7 @@ configure_external_access() {
         
         # Wait for Load Balancer
         print_info "Waiting for Load Balancer to be provisioned..."
-        kubectl wait --for=condition=Ready --timeout=300s svc/frontend -n $NAMESPACE
+        kubectl wait --for=condition=Available=True --timeout=300s deployment/frontend -n $NAMESPACE
         
         print_success "External access configured!"
     fi

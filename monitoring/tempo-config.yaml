@@ -35,12 +35,6 @@ data:
       compaction:
         block_retention: 1h
         compacted_block_retention: 10m
-      storage:
-        path: /var/tempo/compactor
-        trace:
-          backend: local
-          local:
-            path: /var/tempo/traces
     
     distributor:
       receivers:
@@ -66,17 +60,4 @@ data:
     ingester:
       max_block_bytes: 1_000_000
       max_block_duration: 5m
-      max_compaction_objects: 6000000
-      complete_block_timeout: 1h
-      retention: 24h
-    
-    querier:
-      frontend_worker:
-        frontend_address: "tempo-query-frontend:9095"
-    
-    query_frontend:
-      downstream_url: "http://tempo-querier:3200"
-    
-    memberlist:
-      join_members:
-        - tempo:7946 
+      complete_block_timeout: 1h 

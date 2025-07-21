@@ -20,7 +20,12 @@ spec:
       serviceAccountName: vector
       containers:
       - name: vector
-        image: timberio/vector:0.34-alpine
+        image: timberio/vector:0.34.0-alpine
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
         ports:
         - containerPort: 8686
           name: api
@@ -39,9 +44,6 @@ spec:
           subPath: vector.yaml
         - name: var-log
           mountPath: /var/log
-          readOnly: true
-        - name: var-lib
-          mountPath: /var/lib
           readOnly: true
         - name: etc-machine-id
           mountPath: /etc/machine-id
@@ -65,9 +67,6 @@ spec:
       - name: var-log
         hostPath:
           path: /var/log
-      - name: var-lib
-        hostPath:
-          path: /var/lib
       - name: etc-machine-id
         hostPath:
           path: /etc/machine-id

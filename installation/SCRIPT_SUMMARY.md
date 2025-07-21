@@ -1,419 +1,159 @@
-# 📋 Installation Scripts Summary
+# Installation Scripts Summary
 
-This document provides an overview of all installation scripts and their purposes.
+This document provides an overview of all installation and deployment scripts in the microservices-demo project.
 
-## 🎯 **Master Scripts (Recommended)**
+## 🚀 **Deployment Scripts**
 
-### **1. Complete Stack Deployment**
-**File**: `deploy-complete-stack.sh`
-**Purpose**: One-command deployment of complete stack (observability + application)
-**Features**:
-- ✅ **Automated orchestration**: Deploys observability framework first, then application
-- ✅ **Multiple deployment types**: AWS and local deployment support
-- ✅ **Flexible configuration**: External access, Istio, load generator options
-- ✅ **Comprehensive verification**: Validates both observability and application
-- ✅ **Production ready**: Handles all prerequisites and error conditions
+### **Main Deployment Scripts**
+- **`deploy-aws-observability.sh`** - Complete AWS observability framework deployment
+  - Creates EKS cluster with proper IAM roles
+  - Deploys Prometheus, Grafana, Loki, Tempo, Alertmanager
+  - Configures AWS Load Balancer Controller
+  - Supports Classic Load Balancer option
+  - Handles CRD installation with server-side apply
 
-**Usage**:
-```bash
-# AWS deployment with external access
-./installation/deploy-complete-stack.sh
+- **`deploy-online-boutique.sh`** - Online boutique microservices application deployment
+  - Deploys all microservices (frontend, backend, database)
+  - Supports multiple deployment methods (kubectl, helm, istio)
+  - Configurable external access and load balancer types
+  - Includes load generator for testing
 
-# Local deployment
-./installation/deploy-complete-stack.sh --type local
+- **`deploy-complete-stack.sh`** - Orchestrates complete deployment
+  - Deploys both observability framework and application
+  - Configurable deployment options
+  - Comprehensive verification and access information
 
-# AWS with Istio
-./installation/deploy-complete-stack.sh --type aws --enable-istio
-
-# Custom namespace
-./installation/deploy-complete-stack.sh --namespace my-app
-```
-
-### **2. Complete Stack Cleanup**
-**File**: `cleanup-complete-stack.sh`
-**Purpose**: One-command cleanup of complete stack
-**Features**:
-- ✅ **Smart detection**: Auto-detects deployment type (AWS vs local)
-- ✅ **Flexible cleanup**: Clean up everything, app-only, or observability-only
-- ✅ **Orphaned resource cleanup**: Removes PVs, PVCs, and load balancers
-- ✅ **Safety features**: Confirmation prompts and verification
-- ✅ **Comprehensive verification**: Ensures complete cleanup
-
-**Usage**:
-```bash
-# Clean up everything (with confirmation)
-./installation/cleanup-complete-stack.sh
-
-# Clean up only application
-./installation/cleanup-complete-stack.sh --type app-only
-
-# Clean up without confirmation
-./installation/cleanup-complete-stack.sh --confirm
-```
-
----
-
-## 🚀 **Individual Deployment Scripts**
-
-### **1. AWS Observability Deployment (Production Ready)**
-**File**: `deploy-aws-observability.sh`
-**Purpose**: Complete AWS deployment with EKS cluster and observability framework
-**Phases**:
-- ✅ **Phase 1**: Deploy AWS resources (EKS cluster, IAM roles, Load Balancers)
-- ✅ **Phase 2**: Deploy observability framework
-- ✅ **Phase 3**: Verify installation and provide access URLs
-
-**Features**:
-- ✅ **Robust EKS wait**: Handles eksctl utils wait issues with fallback methods
-- ✅ **Timeout protection**: Prevents infinite waiting with configurable timeouts
-- ✅ **kubectl verification**: Ensures connectivity after cluster is ready
-- ✅ **Error handling**: Comprehensive error checking and recovery
-
-**Usage**:
-```bash
-chmod +x installation/deploy-aws-observability.sh
-./installation/deploy-aws-observability.sh
-```
-
-**Timeline**: 15-20 minutes
-**Cost**: ~$50-200/month
-
-### **2. Online Boutique Deployment (Application)**
-**File**: `deploy-online-boutique.sh`
-**Purpose**: Deploy the complete online boutique microservices application
-**Features**:
-- ✅ Deploys 11 microservices (frontend, cart, payment, etc.)
-- ✅ Supports multiple deployment methods (Kubernetes, Helm, Kustomize)
-- ✅ Optional Istio service mesh integration
-- ✅ Load generator for testing
-- ✅ External access configuration
-- ✅ RBAC and security setup
-
-**Usage**:
-```bash
-chmod +x installation/deploy-online-boutique.sh
-./installation/deploy-online-boutique.sh
-```
-
-**Options**:
-```bash
-./installation/deploy-online-boutique.sh --external-access
-./installation/deploy-online-boutique.sh --method helm
-./installation/deploy-online-boutique.sh --enable-istio
-./installation/deploy-online-boutique.sh --namespace my-boutique
-```
-
-**Timeline**: 5-10 minutes
-**Cost**: Cluster costs only
-
-### **3. Local/Existing Cluster Observability**
-**File**: `deploy-observability-enhanced-fixed.sh`
-**Purpose**: Deploy observability framework to existing Kubernetes cluster
-**Features**:
-- ✅ Deploys all monitoring components
-- ✅ Configures dashboards and data sources
-- ✅ Validates deployments
-
-**Usage**:
-```bash
-chmod +x installation/deploy-observability-enhanced-fixed.sh
-./installation/deploy-observability-enhanced-fixed.sh
-```
-
-**Timeline**: 5-10 minutes
-**Cost**: Cluster costs only
-
-### **4. Quick Start (Streamlined)**
-**File**: `quick-start.sh`
-**Purpose**: Streamlined installation for local/existing clusters
-**Features**:
-- ✅ Prerequisites validation
-- ✅ File validation
-- ✅ CRD installation
-- ✅ Complete deployment
-- ✅ Health verification
-
-**Usage**:
-```bash
-chmod +x installation/quick-start.sh
-./installation/quick-start.sh
-```
-
-**Timeline**: 5-10 minutes
-
----
+- **`deploy-with-clb.sh`** - Classic Load Balancer demo deployment
+  - Demonstrates Classic Load Balancer usage
+  - Sample application with CLB configuration
+  - Health checks and monitoring setup
 
 ## 🧹 **Cleanup Scripts**
 
-### **1. AWS Observability Cleanup (Complete)**
-**File**: `cleanup-aws-observability.sh`
-**Purpose**: Complete cleanup of AWS resources and observability framework
-**Features**:
-- ✅ Removes observability components
-- ✅ Deletes EKS cluster and node groups
-- ✅ Removes Load Balancers and EBS volumes
-- ✅ Cleans up IAM roles and policies
-- ✅ Verifies cleanup
-- ✅ Shows cost savings
+### **AWS Cleanup Scripts**
+- **`cleanup-aws-observability.sh`** - AWS observability framework cleanup
+  - Deletes EKS cluster with proper waiting
+  - Removes Load Balancers, EBS volumes, security groups
+  - Cleans up VPC infrastructure if created by eksctl
+  - Handles IAM resources and orphaned resources
 
-**Usage**:
+- **`cleanup-all-aws.sh`** - Comprehensive AWS cleanup (recommended)
+  - Deletes ALL AWS resources in proper order
+  - Handles all Load Balancer types (ALB, NLB, CLB)
+  - Removes VPC, NAT Gateways, Elastic IPs
+  - Cleans up IAM roles, policies, service accounts
+  - Verifies cleanup completion
+
+### **Application Cleanup Scripts**
+- **`cleanup-online-boutique.sh`** - Online boutique application cleanup
+  - Removes application namespaces and resources
+  - Cleans up persistent volumes and services
+  - Configurable cleanup options
+
+- **`cleanup-complete-stack.sh`** - Complete stack cleanup
+  - Orchestrates cleanup of both application and infrastructure
+  - Supports selective cleanup (app-only, observability-only, all)
+
+## 🛠️ **Utility Scripts**
+
+### **Installation Utilities**
+- **`install-prometheus-crds.sh`** - Prometheus Operator CRD installation
+  - Uses server-side apply to handle large CRDs
+  - Avoids annotation size limit errors
+  - Standalone CRD installation script
+
+- **`test-load-balancer-deployment.sh`** - Load balancer deployment testing
+  - Tests Helm availability and chart access
+  - Validates kustomize paths
+  - Verifies AWS Load Balancer Controller deployment readiness
+
+## 📚 **Documentation**
+
+### **Guides and Documentation**
+- **`CLASSIC_LOAD_BALANCER_GUIDE.md`** - Comprehensive CLB usage guide
+- **`TROUBLESHOOTING.md`** - Common issues and solutions
+- **`SCRIPT_SUMMARY.md`** - This file, script overview
+- **`INSTALLATION_SEQUENCE.md`** - Step-by-step installation guide
+- **`REVIEW_SUMMARY.md`** - Project review and architecture summary
+- **`README.md`** - Installation directory overview
+
+## 🔑 **Configuration Files**
+
+### **SSH Keys and Credentials**
+- **`id_rsa_eks`** - SSH private key for EKS nodes
+- **`id_rsa_eks.pub`** - SSH public key for EKS nodes
+- **`keys`** - Additional key configuration
+- **`ai_user_credentials.csv`** - User credentials template
+
+## 🎯 **Usage Examples**
+
+### **Complete Deployment**
 ```bash
-chmod +x installation/cleanup-aws-observability.sh
-./installation/cleanup-aws-observability.sh
+# Deploy everything
+./installation/deploy-complete-stack.sh --confirm
+
+# Deploy with specific options
+./installation/deploy-complete-stack.sh --deployment-type aws --external-access --enable-istio
 ```
 
-### **2. Online Boutique Cleanup (Application)**
-**File**: `cleanup-online-boutique.sh`
-**Purpose**: Complete cleanup of online boutique microservices application
-**Features**:
-- ✅ Removes all microservices deployments
-- ✅ Deletes namespace and all resources
-- ✅ Cleans up persistent volumes and claims
-- ✅ Removes RBAC resources
-- ✅ Cleans up Istio resources (if applicable)
-- ✅ Auto-detects deployment method (Kubernetes/Helm)
-
-**Usage**:
+### **Individual Deployments**
 ```bash
-chmod +x installation/cleanup-online-boutique.sh
-./installation/cleanup-online-boutique.sh
-```
+# Deploy observability only
+./installation/deploy-aws-observability.sh --confirm
 
-**Options**:
-```bash
-./installation/cleanup-online-boutique.sh --force
-./installation/cleanup-online-boutique.sh --namespace my-boutique
-./installation/cleanup-online-boutique.sh --method helm
-```
-
-### **2. Validation Script**
-**File**: `validate-observability.sh`
-**Purpose**: Comprehensive validation of observability framework
-**Features**:
-- ✅ File existence validation
-- ✅ YAML syntax validation
-- ✅ Configuration validation
-- ✅ Performance compliance check
-- ✅ Detailed reporting
-
-**Usage**:
-```bash
-chmod +x installation/validate-observability.sh
-./installation/validate-observability.sh
-```
-
----
-
-## 📚 **Documentation Files**
-
-### **1. Installation Guide**
-**File**: `../INSTALLATION_GUIDE.md`
-**Purpose**: Complete step-by-step installation guide
-**Content**:
-- Prerequisites and requirements
-- AWS and local deployment options
-- Post-installation verification
-- Configuration updates
-- Troubleshooting
-
-### **2. Troubleshooting Guide**
-**File**: `TROUBLESHOOTING.md`
-**Purpose**: Common issues and solutions
-**Content**:
-- Pod startup issues
-- Service connectivity problems
-- Performance issues
-- Configuration problems
-
-### **3. AWS EKS Setup Guide**
-**File**: `AWS-EKS-SETUP.md`
-**Purpose**: Detailed AWS EKS setup instructions
-**Content**:
-- AWS account setup
-- IAM configuration
-- EKS cluster creation
-- Best practices
-
-### **4. Cleanup Guide**
-**File**: `CLEANUP-GUIDE.md`
-**Purpose**: Manual cleanup instructions
-**Content**:
-- Step-by-step cleanup process
-- Resource verification
-- Cost optimization tips
-
----
-
-## 🎯 **Script Selection Guide**
-
-### **For Complete Production Setup**
-```bash
-# 1. Deploy AWS infrastructure and observability
-./installation/deploy-aws-observability.sh
-
-# 2. Deploy online boutique application
+# Deploy application only
 ./installation/deploy-online-boutique.sh --external-access
 
-# 3. Cleanup when done
-./installation/cleanup-online-boutique.sh
-./installation/cleanup-aws-observability.sh
+# Deploy with Classic Load Balancer
+./installation/deploy-aws-observability.sh --load-balancer-type clb
 ```
 
-### **For Development/Local Testing**
+### **Cleanup Operations**
 ```bash
-# 1. Deploy observability framework
-./installation/quick-start.sh
+# Complete cleanup (recommended)
+./installation/cleanup-all-aws.sh --confirm
 
-# 2. Deploy online boutique application
-./installation/deploy-online-boutique.sh
+# Selective cleanup
+./installation/cleanup-complete-stack.sh --type app-only --confirm
 
-# 3. Access application
-kubectl port-forward -n online-boutique svc/frontend 8080:8080
+# Force cleanup of orphaned resources
+./installation/cleanup-all-aws.sh --force --confirm
 ```
 
-### **For Application Only (Existing Cluster)**
-```bash
-# Deploy just the online boutique
-./installation/deploy-online-boutique.sh --method helm
+## 🔧 **Script Features**
 
-# Or with external access
-./installation/deploy-online-boutique.sh --external-access
-```
+### **Common Features**
+- ✅ **Command-line arguments** for configuration
+- ✅ **Prerequisites checking** before execution
+- ✅ **Error handling** and graceful failures
+- ✅ **Progress feedback** with colored output
+- ✅ **Verification steps** after deployment
+- ✅ **Cleanup confirmation** for safety
+- ✅ **Documentation** and help messages
 
-### **For Validation and Testing**
-```bash
-# Validate observability framework
-./installation/validate-observability.sh
+### **AWS-Specific Features**
+- ✅ **EKS cluster management** with proper waiting
+- ✅ **IAM role and policy** creation
+- ✅ **Load balancer configuration** (ALB, NLB, CLB)
+- ✅ **VPC and networking** setup
+- ✅ **Resource cleanup** in proper order
+- ✅ **Orphaned resource** detection and removal
 
-# Test application deployment
-kubectl get pods -n online-boutique
-```
+## 📋 **Removed Scripts**
 
----
+The following obsolete scripts have been removed:
+- ❌ `deploy-observability-enhanced-fixed.sh` - Superseded by `deploy-aws-observability.sh`
+- ❌ `quick-start.sh` - Superseded by `deploy-aws-observability.sh`
+- ❌ `test-eks-wait.sh` - Testing script, no longer needed
+- ❌ `validate-observability.sh` - Validation integrated into main scripts
 
-## ⚙️ **Configuration Files**
+## 🎉 **Summary**
 
-### **1. AWS Optimized Manifests**
-**File**: `aws-optimized-manifests.yaml`
-**Purpose**: AWS-specific Kubernetes manifests
-**Content**:
-- Storage class configurations
-- Load Balancer annotations
-- AWS-specific resource limits
+The installation directory now contains a streamlined set of scripts that provide:
+- **Complete deployment** from zero to production-ready
+- **Comprehensive cleanup** of all resources
+- **Multiple deployment options** for different use cases
+- **Robust error handling** and verification
+- **Clear documentation** and usage examples
 
-### **2. Credentials and Keys**
-**File**: `keys`, `ai_user_credentials.csv`
-**Purpose**: Sample credentials and configuration
-**Note**: Replace with actual credentials for production use
-
----
-
-## 🔧 **Prerequisites by Script**
-
-### **AWS Deployment Script**
-- ✅ AWS CLI installed and configured
-- ✅ eksctl installed
-- ✅ kubectl installed
-- ✅ Valid AWS credentials
-- ✅ Sufficient AWS permissions
-
-### **Local Deployment Scripts**
-- ✅ kubectl installed
-- ✅ Access to Kubernetes cluster
-- ✅ Cluster resources available
-- ✅ Storage class configured
-
-### **Validation Script**
-- ✅ kubectl installed
-- ✅ Access to Kubernetes cluster
-- ✅ All monitoring files present
-
----
-
-## 📊 **Performance and Resource Requirements**
-
-### **AWS Deployment**
-- **EKS Cluster**: 3 t3.medium nodes (minimum)
-- **Storage**: 50GB+ EBS volumes
-- **Load Balancers**: 3 Network Load Balancers
-- **Estimated Cost**: $50-200/month
-
-### **Local Deployment**
-- **CPU**: 4+ cores
-- **Memory**: 8GB+ RAM
-- **Storage**: 50GB+ available
-- **Network**: Stable internet connection
-
----
-
-## 🚨 **Important Notes**
-
-### **Security Considerations**
-- Update Alertmanager configuration with real webhook URLs
-- Configure proper RBAC for production use
-- Set up network policies for security
-- Use secrets management for sensitive data
-
-### **Cost Optimization**
-- Use Spot instances for cost savings
-- Implement data retention policies
-- Monitor resource usage
-- Clean up unused resources
-
-### **Production Readiness**
-- Test in non-production environment first
-- Configure proper alert channels
-- Set up monitoring for the monitoring stack
-- Implement backup and recovery procedures
-
----
-
-## 🎉 **Quick Start Commands**
-
-### **Complete Production Setup (AWS + Application)**
-```bash
-# 1. Deploy AWS infrastructure and observability
-./installation/deploy-aws-observability.sh
-
-# 2. Deploy online boutique application
-./installation/deploy-online-boutique.sh --external-access
-
-# 3. Access applications
-kubectl get svc -n monitoring  # Observability URLs
-kubectl get svc -n online-boutique  # Application URLs
-
-# 4. Cleanup when done
-./installation/cleanup-online-boutique.sh
-./installation/cleanup-aws-observability.sh
-```
-
-### **Local Development Setup**
-```bash
-# 1. Deploy observability framework
-./installation/quick-start.sh
-
-# 2. Deploy online boutique application
-./installation/deploy-online-boutique.sh
-
-# 3. Access applications
-kubectl port-forward -n monitoring svc/grafana-service 3000:3000  # Grafana
-kubectl port-forward -n online-boutique svc/frontend 8080:8080    # Boutique
-
-# 4. Cleanup
-kubectl delete namespace online-boutique
-kubectl delete namespace monitoring
-```
-
-### **Application Only (Existing Cluster)**
-```bash
-# 1. Deploy online boutique
-./installation/deploy-online-boutique.sh --external-access
-
-# 2. Access application
-kubectl get svc frontend -n online-boutique
-
-# 3. Cleanup
-./installation/cleanup-online-boutique.sh
-```
-
-All scripts are production-ready and include comprehensive error handling, validation, and documentation. 
+All scripts are production-ready and include proper error handling, validation, and cleanup capabilities.

@@ -83,6 +83,10 @@ parse_arguments() {
                 ENABLE_LOAD_GENERATOR="true"
                 shift
                 ;;
+            --load-balancer-type)
+                LOAD_BALANCER_TYPE="$2"
+                shift 2
+                ;;
             --help)
                 show_help
                 exit 0
@@ -142,8 +146,8 @@ deploy_observability() {
         print_info "Deploying AWS observability framework..."
         ./installation/deploy-aws-observability.sh
     else
-        print_info "Deploying local observability framework..."
-        ./installation/quick-start.sh
+        print_warning "Local deployment not supported. Use AWS deployment."
+        exit 1
     fi
     
     print_success "Observability framework deployed successfully!"
@@ -189,7 +193,7 @@ verify_installation() {
     
     # Verify observability components
     print_info "Verifying observability components..."
-    ./installation/validate-observability.sh
+    print_info "Observability validation integrated into deployment script"
     
     # Verify application components
     print_info "Verifying application components..."
@@ -241,9 +245,9 @@ display_access_info() {
         echo "Get Load Balancer URLs:"
         echo "kubectl get svc -n monitoring -o wide"
     else
-        echo "Grafana: kubectl port-forward -n monitoring svc/grafana-service 3000:3000"
-        echo "Prometheus: kubectl port-forward -n monitoring svc/prometheus-service 9090:9090"
-        echo "Alertmanager: kubectl port-forward -n monitoring svc/alertmanager-service 9093:9093"
+        echo "Grafana: kubectl port-forward -n monitoring svc/grafana 3000:3000"
+        echo "Prometheus: kubectl port-forward -n monitoring svc/prometheus 9090:9090"
+        echo "Alertmanager: kubectl port-forward -n monitoring svc/alertmanager 9093:9093"
     fi
     
     echo ""

@@ -5,6 +5,10 @@ metadata:
   namespace: monitoring
 data:
   config.yaml: |
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+    
     receivers:
       otlp:
         protocols:
@@ -58,6 +62,7 @@ data:
         enable_open_metrics: true
     
     service:
+      extensions: [health_check]
       pipelines:
         traces:
           receivers: [otlp, jaeger, zipkin]

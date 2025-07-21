@@ -30,9 +30,9 @@ spec:
         - containerPort: 14268
           name: jaeger-http
         - containerPort: 6831
-          name: jaeger-thrift-compact
+          name: jaeger-compact
         - containerPort: 6832
-          name: jaeger-thrift-binary
+          name: jaeger-binary
         - containerPort: 4317
           name: otlp-grpc
         - containerPort: 4318
@@ -103,11 +103,11 @@ spec:
   - port: 6831
     targetPort: 6831
     protocol: UDP
-    name: jaeger-thrift-compact
+    name: jaeger-compact
   - port: 6832
     targetPort: 6832
     protocol: UDP
-    name: jaeger-thrift-binary
+    name: jaeger-binary
   - port: 4317
     targetPort: 4317
     protocol: TCP

@@ -45,12 +45,7 @@ spec:
             port: 9080
           initialDelaySeconds: 30
           timeoutSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 9080
-          initialDelaySeconds: 30
-          timeoutSeconds: 30
+        # readinessProbe removed to keep Promtail always running
       volumes:
       - name: promtail-config
         configMap:

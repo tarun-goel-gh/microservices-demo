@@ -15,45 +15,33 @@ data:
       ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
     
     ingester:
       ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
         heartbeat_timeout: 1m
         heartbeat_period: 10s
-      max_global_series_per_user: 1000000
-      max_global_series_per_metric: 100000
     
     compactor:
       sharding_ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
     
     store_gateway:
       sharding_ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
     
     ruler:
       ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
     
     alertmanager:
       sharding_ring:
         kvstore:
           store: memberlist
-        replication_factor: 1
-    
-    memberlist:
-      join_members:
-        - mimir:7946
     
     limits:
       max_global_series_per_user: 1000000
@@ -66,29 +54,6 @@ data:
       ruler_max_rules_per_rule_group: 20
       ruler_max_rule_groups_per_tenant: 70
     
-    storage:
-      engine: blocks
-      blocks_storage:
-        backend: filesystem
-        filesystem:
-          dir: /data/mimir/blocks
-        tsdb:
-          dir: /data/mimir/tsdb
-        bucket_store:
-          sync_dir: /data/mimir/bucket-sync
-          index_cache:
-            backend: filesystem
-            filesystem:
-              dir: /data/mimir/index-cache
-        compactor:
-          data_dir: /data/mimir/compactor
-          sharding_ring:
-            kvstore:
-              store: memberlist
-            replication_factor: 1
-    
-    common:
-      storage:
-        backend: filesystem
-        filesystem:
-          dir: /data/mimir/rules 
+    memberlist:
+      join_members:
+        - mimir:7946 
