@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: paymentservice
+        image: docker.io/tarungoel797/paymentservice
         ports:
         - containerPort: 50051
         env:

@@ -10,7 +10,7 @@ import (
 )
 
 var deploymentDetailsMap map[string]string
-var log *logrus.Logger
+var deploymentLog *logrus.Logger
 
 func init() {
 	initializeLogger()
@@ -20,9 +20,9 @@ func init() {
 }
 
 func initializeLogger() {
-	log = logrus.New()
-	log.Level = logrus.DebugLevel
-	log.Formatter = &logrus.JSONFormatter{
+	deploymentLog = logrus.New()
+	deploymentLog.Level = logrus.DebugLevel
+	deploymentLog.Formatter = &logrus.JSONFormatter{
 		FieldMap: logrus.FieldMap{
 			logrus.FieldKeyTime:  "timestamp",
 			logrus.FieldKeyLevel: "severity",
@@ -30,7 +30,7 @@ func initializeLogger() {
 		},
 		TimestampFormat: time.RFC3339Nano,
 	}
-	log.Out = os.Stdout
+	deploymentLog.Out = os.Stdout
 }
 
 func loadDeploymentDetails() {
@@ -39,24 +39,24 @@ func loadDeploymentDetails() {
 
 	podHostname, err := os.Hostname()
 	if err != nil {
-		log.Error("Failed to fetch the hostname for the Pod", err)
+		deploymentLog.Error("Failed to fetch the hostname for the Pod", err)
 	}
 
 	podCluster, err := metaServerClient.InstanceAttributeValue("cluster-name")
 	if err != nil {
-		log.Error("Failed to fetch the name of the cluster in which the pod is running", err)
+		deploymentLog.Error("Failed to fetch the name of the cluster in which the pod is running", err)
 	}
 
 	podZone, err := metaServerClient.Zone()
 	if err != nil {
-		log.Error("Failed to fetch the Zone of the node where the pod is scheduled", err)
+		deploymentLog.Error("Failed to fetch the Zone of the node where the pod is scheduled", err)
 	}
 
 	deploymentDetailsMap["HOSTNAME"] = podHostname
 	deploymentDetailsMap["CLUSTERNAME"] = podCluster
 	deploymentDetailsMap["ZONE"] = podZone
 
-	log.WithFields(logrus.Fields{
+	deploymentLog.WithFields(logrus.Fields{
 		"cluster":  podCluster,
 		"zone":     podZone,
 		"hostname": podHostname,

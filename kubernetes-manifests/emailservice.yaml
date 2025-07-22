@@ -43,7 +43,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: emailservice
+        image: docker.io/tarungoel797/emailservice
         ports:
         - containerPort: 8080
         env:

@@ -11,12 +11,12 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.17.0"
 	"go.opentelemetry.io/otel/trace"
-	"google.golang.org/grpc/codes"
 	"database/sql"
 )
 
@@ -226,39 +226,9 @@ func (c *CacheClient) Set(ctx context.Context, key string, value interface{}, ex
 	return nil
 }
 
-// metricsMiddleware adds Prometheus metrics to HTTP handlers
-func metricsMiddleware(handler http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		
-		// Create response writer wrapper
-		wrappedWriter := &responseWriter{ResponseWriter: w, statusCode: 200}
-		
-		// Call original handler
-		handler(wrappedWriter, r)
-		
-		// Record metrics
-		duration := time.Since(start).Seconds()
-		
-		// Increment request counter
-		httpRequestsTotal.WithLabelValues(
-			r.Method,
-			r.URL.Path,
-			string(wrappedWriter.statusCode),
-		).Inc()
-		
-		// Record request duration
-		httpRequestDuration.WithLabelValues(
-			r.Method,
-			r.URL.Path,
-		).Observe(duration)
-	}
-}
 
 // structuredLogger creates a structured logger with tracing context
 func structuredLogger(ctx context.Context) *log.Logger {
-	span := trace.SpanFromContext(ctx)
-	
 	return log.New(os.Stdout, "", log.LstdFlags)
 }
 

@@ -854,6 +854,60 @@ EOF
     print_success "AWS resources deployed successfully!"
 }
 
+# Function to fix Grafana dashboards
+fix_grafana_dashboards() {
+    print_info "Fixing Grafana dashboard configurations..."
+    
+    # Create fixed dashboard ConfigMaps
+    print_info "Creating fixed dashboard ConfigMaps..."
+    
+    # Create microservices dashboard ConfigMap with correct JSON structure
+    kubectl create configmap microservices-dashboard-fixed \
+        --from-file=microservices-dashboard.json=monitoring/microservices-dashboard-fixed.json \
+        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+    
+    # Create observability dashboard ConfigMap with correct JSON structure
+    kubectl create configmap observability-dashboard-fixed \
+        --from-file=observability-dashboard.json=monitoring/observability-dashboard-fixed.json \
+        -n monitoring --dry-run=client -o yaml | kubectl apply -f -
+    
+    print_success "Fixed dashboard ConfigMaps created successfully!"
+    
+    # Update Grafana deployment to use fixed dashboards
+    print_info "Updating Grafana deployment to use fixed dashboards..."
+    
+    # Patch the Grafana deployment to use the fixed ConfigMaps
+    kubectl patch deployment grafana -n monitoring --patch-file - <<EOF
+spec:
+  template:
+    spec:
+      containers:
+      - name: grafana
+        volumeMounts:
+        - name: microservices-dashboard-fixed
+          mountPath: /var/lib/grafana/dashboards/default/microservices-dashboard.json
+          subPath: microservices-dashboard.json
+        - name: observability-dashboard-fixed
+          mountPath: /var/lib/grafana/dashboards/default/observability-dashboard.json
+          subPath: observability-dashboard.json
+      volumes:
+      - name: microservices-dashboard-fixed
+        configMap:
+          name: microservices-dashboard-fixed
+      - name: observability-dashboard-fixed
+        configMap:
+          name: observability-dashboard-fixed
+EOF
+    
+    print_success "Grafana deployment updated with fixed dashboards!"
+    
+    # Clean up old ConfigMaps if they exist
+    print_info "Cleaning up old dashboard ConfigMaps..."
+    kubectl delete configmap microservices-dashboard observability-dashboard -n monitoring 2>/dev/null || true
+    
+    print_success "Grafana dashboard fixes applied successfully!"
+}
+
 # Function to deploy observability framework
 deploy_observability_framework() {
     print_info "Phase 2: Deploying Observability Framework"
@@ -881,6 +935,8 @@ deploy_observability_framework() {
         "monitoring/alertmanager-config.yaml"
         "monitoring/alertmanager-deployment.yaml"
         "monitoring/alertmanager-templates.yaml"
+        "monitoring/microservices-dashboard-fixed.json"
+        "monitoring/observability-dashboard-fixed.json"
     )
     
     for file in "${required_files[@]}"; do
@@ -951,6 +1007,17 @@ deploy_observability_framework() {
     kubectl apply -f monitoring/kube-state-metrics.yaml
     kubectl apply -f monitoring/mimir-config.yaml
     kubectl apply -f monitoring/mimir-deployment.yaml
+    
+    # Wait for Grafana to be ready before applying dashboard fixes
+    print_info "Waiting for Grafana deployment to be ready..."
+    kubectl wait --for=condition=available --timeout=300s deployment/grafana -n monitoring
+    
+    # Apply Grafana dashboard fixes
+    fix_grafana_dashboards
+    
+    # Restart Grafana to pick up the dashboard changes
+    print_info "Restarting Grafana to apply dashboard fixes..."
+    kubectl rollout restart deployment/grafana -n monitoring
     
     # Create AWS Load Balancer services for external access
     print_info "Creating Load Balancer services for external access..."
@@ -1080,6 +1147,53 @@ verify_installation() {
     print_info "Checking storage..."
     kubectl get pvc -n monitoring
     
+    # Verify Grafana dashboard fixes
+    print_info "Verifying Grafana dashboard fixes..."
+    
+    # Check if fixed ConfigMaps exist
+    if kubectl get configmap microservices-dashboard-fixed -n monitoring &>/dev/null; then
+        print_success "Fixed microservices dashboard ConfigMap exists"
+    else
+        print_warning "Fixed microservices dashboard ConfigMap not found"
+    fi
+    
+    if kubectl get configmap observability-dashboard-fixed -n monitoring &>/dev/null; then
+        print_success "Fixed observability dashboard ConfigMap exists"
+    else
+        print_warning "Fixed observability dashboard ConfigMap not found"
+    fi
+    
+    # Check if dashboard files are properly mounted in Grafana
+    GRAFANA_POD=$(kubectl get pods -n monitoring -l app=grafana -o jsonpath='{.items[0].metadata.name}' 2>/dev/null)
+    if [ ! -z "$GRAFANA_POD" ]; then
+        if kubectl exec -n monitoring "$GRAFANA_POD" -- test -f /var/lib/grafana/dashboards/default/microservices-dashboard.json; then
+            print_success "Microservices dashboard file is properly mounted"
+        else
+            print_warning "Microservices dashboard file not found in Grafana pod"
+        fi
+        
+        if kubectl exec -n monitoring "$GRAFANA_POD" -- test -f /var/lib/grafana/dashboards/default/observability-dashboard.json; then
+            print_success "Observability dashboard file is properly mounted"
+        else
+            print_warning "Observability dashboard file not found in Grafana pod"
+        fi
+        
+        # Check dashboard JSON structure
+        if kubectl exec -n monitoring "$GRAFANA_POD" -- head -1 /var/lib/grafana/dashboards/default/microservices-dashboard.json | grep -q '"id"'; then
+            print_success "Microservices dashboard has correct JSON structure"
+        else
+            print_warning "Microservices dashboard JSON structure may be incorrect"
+        fi
+        
+        if kubectl exec -n monitoring "$GRAFANA_POD" -- head -1 /var/lib/grafana/dashboards/default/observability-dashboard.json | grep -q '"id"'; then
+            print_success "Observability dashboard has correct JSON structure"
+        else
+            print_warning "Observability dashboard JSON structure may be incorrect"
+        fi
+    else
+        print_warning "Grafana pod not found for dashboard verification"
+    fi
+    
     print_success "Installation verification completed!"
 }
 
@@ -1107,6 +1221,9 @@ display_access_info() {
     echo "------------"
     if [ ! -z "$GRAFANA_LB" ]; then
         echo "📊 Grafana Dashboard: http://$GRAFANA_LB (admin/admin)"
+        echo "   - Microservices Demo Overview dashboard"
+        echo "   - Microservices Observability Complete dashboard"
+        echo "   - Dashboards automatically provisioned with correct structure"
     else
         echo "📊 Grafana Dashboard: Load Balancer still provisioning..."
     fi
@@ -1171,6 +1288,11 @@ show_configuration_notes() {
     echo "   - Configure network policies"
     echo "   - Set up RBAC for applications"
     echo "   - Configure secrets management"
+    echo ""
+    echo "4. Grafana Dashboards:"
+    echo "   - Dashboards are automatically provisioned with correct JSON structure"
+    echo "   - Fixed dashboard ConfigMaps prevent 'Dashboard title cannot be empty' errors"
+    echo "   - Custom dashboards can be added to monitoring/dashboards/ directory"
     echo ""
 }
 

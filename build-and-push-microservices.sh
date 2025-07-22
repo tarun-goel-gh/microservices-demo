@@ -44,25 +44,13 @@ build_and_push_service() {
     
     print_status "Building $service_name..."
     
-    # Build the image
-    docker build --platform=linux/amd64 -t "$DOCKER_USERNAME/$service_name:$TAG" -f "$dockerfile_path" "$context_path"
+    # Build the image for multiple architectures using buildx
+    docker buildx build --platform=linux/amd64,linux/arm64 -t "$DOCKER_USERNAME/$service_name:$TAG" -f "$dockerfile_path" "$context_path" --push
     
     if [ $? -eq 0 ]; then
-        print_success "Successfully built $service_name"
+        print_success "Successfully built and pushed $service_name for multiple architectures"
     else
         print_error "Failed to build $service_name"
-        return 1
-    fi
-    
-    print_status "Pushing $service_name to Docker Hub..."
-    
-    # Push the image
-    docker push "$DOCKER_USERNAME/$service_name:$TAG"
-    
-    if [ $? -eq 0 ]; then
-        print_success "Successfully pushed $service_name to Docker Hub"
-    else
-        print_error "Failed to push $service_name to Docker Hub"
         return 1
     fi
 }
