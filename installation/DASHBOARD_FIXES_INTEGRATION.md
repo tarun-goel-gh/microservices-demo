@@ -141,7 +141,7 @@ If dashboard issues persist:
 3. **Check Logs**: Review Grafana logs for any remaining errors
 4. **Manual Fix**: If needed, run the standalone fix script:
    ```bash
-   ./fix-grafana-dashboards.sh
+   ./scripts/fix-grafana-dashboards.sh
    ```
 
 ## Future Enhancements

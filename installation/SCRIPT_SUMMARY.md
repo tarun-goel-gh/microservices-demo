@@ -74,7 +74,7 @@ This document provides an overview of all installation and deployment scripts in
 - **`TROUBLESHOOTING.md`** - Common issues and solutions
 - **`SCRIPT_SUMMARY.md`** - This file, script overview
 - **`INSTALLATION_SEQUENCE.md`** - Step-by-step installation guide
-- **`REVIEW_SUMMARY.md`** - Project review and architecture summary
+- **`../docs/REVIEW_SUMMARY.md`** - Project review and architecture summary
 - **`README.md`** - Installation directory overview
 
 ## 🔑 **Configuration Files**

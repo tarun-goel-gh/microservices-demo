@@ -528,7 +528,7 @@ kubectl port-forward -n monitoring svc/grafana-service 3000:3000
 ```
 
 For additional help, refer to:
-- `INSTALLATION_GUIDE.md` - Detailed observability installation
-- `ONLINE_BOUTIQUE_INSTALLATION.md` - Detailed application installation
+- `docs/INSTALLATION_GUIDE.md` - Detailed observability installation
+- `docs/ONLINE_BOUTIQUE_INSTALLATION.md` - Detailed application installation
 - `installation/TROUBLESHOOTING.md` - Troubleshooting guide
 - `monitoring/OBSERVABILITY_FRAMEWORK.md` - Observability architecture 

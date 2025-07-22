@@ -69,9 +69,9 @@ kubectl port-forward -n online-boutique svc/frontend 8080:8080 &
 
 - `SCRIPT_SUMMARY.md` - Detailed script descriptions and usage
 - `TROUBLESHOOTING.md` - Common issues and solutions
-- `../INSTALLATION_GUIDE.md` - Complete installation guide
-- `../ONLINE_BOUTIQUE_INSTALLATION.md` - Application-specific guide
-- `../COMPLETE_INSTALLATION_FLOW.md` - End-to-end installation flow
+- `../docs/INSTALLATION_GUIDE.md` - Complete installation guide
+- `../docs/ONLINE_BOUTIQUE_INSTALLATION.md` - Application-specific guide
+- `../docs/COMPLETE_INSTALLATION_FLOW.md` - End-to-end installation flow
 
 ## 🔧 **Prerequisites**
 

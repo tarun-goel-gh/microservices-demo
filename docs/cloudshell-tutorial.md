@@ -60,7 +60,7 @@ Now you can run Online Boutique on your Kubernetes cluster!
 
 5. If prompted, authorize Cloud Shell to make a GCP API call with your credentials.
 
-Cloud Code uses configurations defined in <walkthrough-editor-open-file filePath="skaffold.yaml">skaffold.yaml</walkthrough-editor-open-file> to build and deploy the app. *It may take a few minutes for the deploy to complete.*
+Cloud Code uses configurations defined in <walkthrough-editor-open-file filePath="config/skaffold.yaml">config/skaffold.yaml</walkthrough-editor-open-file> to build and deploy the app. *It may take a few minutes for the deploy to complete.*
 
 6. Once the app is running, the local URLs will be displayed in the <walkthrough-editor-spotlight spotlightId="output">Output</walkthrough-editor-spotlight> terminal. 
 

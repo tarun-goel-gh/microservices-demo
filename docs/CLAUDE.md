@@ -94,7 +94,7 @@ Complete monitoring solution with:
 
 ## Key Configuration Files
 
-- `skaffold.yaml` - Build and deployment configuration
+- `config/skaffold.yaml` - Build and deployment configuration
 - `kubernetes-manifests/` - Individual service Kubernetes manifests
 - `helm-chart/` - Helm chart for deployment
 - Protocol buffer definitions in `/protos/`

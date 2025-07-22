@@ -508,7 +508,7 @@ Your observability framework is now installed and ready to use. The framework pr
 For additional help, refer to:
 - `monitoring/OBSERVABILITY_FRAMEWORK.md` - Detailed architecture documentation
 - `installation/TROUBLESHOOTING.md` - Troubleshooting guide
-- `REVIEW_SUMMARY.md` - Complete review and fixes summary
+- `docs/REVIEW_SUMMARY.md` - Complete review and fixes summary
 
 ---
 
